@@ -1,0 +1,68 @@
+# {{ ansible_managed }}
+
+# KERBEROS
+## Future usage (Kerberos integration on desktop)
+#auth_param negotiate program /usr/lib/squid3/negotiate_kerberos_auth -di -s HTTP/{{ ansible_fqdn }}
+#auth_param negotiate children 10
+#auth_param negotiate keep_alive on
+
+# LDAP
+## USER AUTHENTICATION
+#auth_param basic program /usr/lib/squid3/basic_ldap_auth -R \
+#    -b "cn=accounts,{{ ipa_ldap_domain }}" \
+#    -f uid=%s -h {{ ipa_master_server }} -ZZ
+#auth_param basic children 10
+#auth_param basic realm {{ ipa_domain }}
+#auth_param basic credentialsttl 30 second
+
+## GROUP CHECK
+## We use compat schema in FreeIPA for group sys_proxy-towers
+#external_acl_type ldap_group ttl=60 %LOGIN /usr/lib/squid3/ext_ldap_group_acl \
+#    -h {{ ipa_master_server }} \
+#    -b "cn=groups,cn=compat,{{ ipa_ldap_domain }}" \
+#    -f "(&(cn=sys_proxy-towers)(objectClass=posixGroup)(memberUid=%u))" \
+#    -P -R -K -S
+
+# ACL
+#acl auth proxy_auth REQUIRED
+
+acl localnet src 0.0.0.1-0.255.255.255  # RFC 1122 "this" network (LAN)
+acl localnet src 10.0.0.0/8     # RFC 1918 local private network (LAN)
+acl localnet src 100.64.0.0/10      # RFC 6598 shared address space (CGN)
+acl localhet src 169.254.0.0/16     # RFC 3927 link-local (directly plugged) machines
+acl localnet src 172.16.0.0/12      # RFC 1918 local private network (LAN)
+acl localnet src 192.168.0.0/16     # RFC 1918 local private network (LAN)
+acl localnet src fc00::/7           # RFC 4193 local private network range
+acl localnet src fe80::/10          # RFC 4291 link-local (directly plugged) machines
+
+acl SSL_ports port 443
+acl Safe_ports port 53      # dns
+acl Safe_ports port 80      # http
+acl Safe_ports port 21      # ftp
+acl Safe_ports port 443     # https
+acl Safe_ports port 1025-65535  # unregistered ports
+acl CONNECT method CONNECT
+#acl GroupACL external ldap_group sys_proxy-towers
+
+
+http_access deny !Safe_ports
+http_access deny CONNECT !SSL_ports
+http_access allow localhost manager
+http_access allow localnet
+http_access deny manager
+#http_access deny !auth
+#http_access deny !GroupACL
+#http_access allow auth GroupACL
+http_access deny all
+
+http_port 3128
+#https_port 3128 cert=/etc/squid3/squid.crt key=/etc/squid3/squid.key cipher=RC4-SHA:HIGH:!ADH options=NO_SSLv2,NO_SSLv3,SINGLE_DH_USE
+
+coredump_dir /var/spool/squid3
+
+refresh_pattern ^ftp:       1440    20% 10080
+refresh_pattern ^gopher:    1440    0%  1440
+refresh_pattern -i (/cgi-bin/|\?) 0 0%  0
+refresh_pattern (Release|Packages(.gz)*)$      0       20%     2880
+refresh_pattern .       0   20% 4320
+

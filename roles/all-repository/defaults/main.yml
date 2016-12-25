@@ -1,0 +1,15 @@
+---
+repo_servers: [ 'repo.default' ]
+manage_repo: true
+
+# BASE KEYS
+repo_testing: false
+repo_gpg_base_url: 'RPM-GPG-KEY-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}'
+repo_gpg_base_url_testing: 'RPM-GPG-KEY-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}-testing'
+
+# EPEL KEYS
+repo_epel: true
+repo_epel_testing: false
+repo_gpg_epel_url: 'RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}'
+repo_gpg_epel_url_testing: 'RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}-testing'
+repo_register: false

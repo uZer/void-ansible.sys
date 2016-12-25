@@ -1,0 +1,49 @@
+---
+- name: TEMPLATE /etc/ssh/ssh_config
+  when: is_tower
+  template: src=etc-ssh-ssh_config.j2 dest=/etc/ssh/ssh_config
+
+  #- name: APT install dependances
+  #  when: is_tower
+  #  apt: name={{ item }} state=latest
+  #  with_items:
+  #    - python
+  #    - software-properties-common
+  #    - python-crypto
+  #    - python-dev
+  #    - python-yaml
+  #    - python-paramiko
+  #    - python-jinja2
+  #    - python-httplib2
+  #    - libssl-dev
+  #    - libffi-dev
+  #    - sshpass
+  #    - python-setuptools
+  #    - libxml2-dev
+  #    - libxslt1-dev
+  #    - squid3
+
+- name: EASY_INSTALL pip
+  easy_install: name=pip state=present
+  become: true
+
+- name: PIP install ansible and dependancies
+  pip: name={{ item }} state=latest
+  become: true
+  with_items:
+    - pip
+    - urllib3
+    - ansible
+    - junos-netconify
+    - junos-eznc
+    - ipaddress
+
+    #- name: TEMPLATE /etc/squid3/squid.conf
+    #  when: is_tower
+    #  template: src=etc-squid3-squid.conf.j2 dest=/etc/squid3/squid.conf
+    #  notify: restart squid3
+    #
+    #- name: SERVICE squid3
+    #  when: is_tower
+    #  service: name=squid3 state=started enabled=yes
+# vim:ft=ansible:

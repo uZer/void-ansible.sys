@@ -1,0 +1,6 @@
+---
+is_ipaclient: true
+is_ipaserver: true
+is_ipaserver_csreplica: true
+is_ntp_server: true
+smtp_source: 'thecastle@tesfess.es'

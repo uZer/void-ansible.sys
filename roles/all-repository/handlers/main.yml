@@ -1,0 +1,24 @@
+---
+
+## UPDATE
+- name: apt_update
+  apt: update_cache=yes
+
+
+## UPGRADE
+- name: apt_upgrade_all
+  apt: upgrade=dist
+
+- name: yum_upgrade_all
+  yum: name=* state=latest update_cache=yes
+
+
+## YUM: RESET REPO
+- name: yum_clean
+  shell: /usr/bin/yum clean all
+
+## YUM: REMOVE CRAPPY REPO
+- name: yum_del
+  shell: find /etc/yum.repos.d/ -name '*.repo' ! -name '*.cobbler.repo' -exec mv {} {}.bak.~ \;
+
+# vim:ft=ansible:

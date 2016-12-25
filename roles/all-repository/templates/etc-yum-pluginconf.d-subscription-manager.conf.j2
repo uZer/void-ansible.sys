@@ -1,0 +1,7 @@
+# {{ ansible_managed }}
+[main]
+{% if repo_register %}
+enabled=1
+{% else %}
+enabled=0
+{% endif %}

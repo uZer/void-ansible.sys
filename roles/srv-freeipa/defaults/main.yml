@@ -1,0 +1,4 @@
+---
+ipa_master_server: ipamaster.void
+is_ipamaster: false
+is_ipaserver_csreplica: false

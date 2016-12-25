@@ -1,0 +1,77 @@
+---
+#############
+## INSTALL ##
+#############
+
+- name: yum install Mediaserv basic tools
+  when: ansible_os_family == 'RedHat' and is_ipaserver
+  yum: name={{ item }} state=installed
+  tags: [ 'package' ]
+  with_items:
+    - ipa-server
+    - ipa-server-dns
+
+################
+## PKI TOMCAT ##
+################
+- name: MASTER PKI REDIRECT /etc/pki/pki-tomcat/ca/CS.cfg
+  when: is_ipaserver and is_ipaserver_csreplica
+  lineinfile: >
+    state=present
+    dest=/etc/pki/pki-tomcat/ca/CS.cfg
+    regexp='^ca.crl.MasterCRL.enableCRLCache='
+    line='ca.crl.MasterCRL.enableCRLCache={{ is_ipamaster|lower }}'
+
+- name: MASTER PKI REDIRECT /etc/pki/pki-tomcat/ca/CS.cfg
+  when: is_ipaserver and is_ipaserver_csreplica
+  lineinfile: >
+    state=present
+    dest=/etc/pki/pki-tomcat/ca/CS.cfg
+    regexp='^ca.crl.MasterCRL.enableCRLUpdates='
+    line='ca.crl.MasterCRL.enableCRLUpdates={{ is_ipamaster|lower }}'
+
+- name: START pki for master
+  when: is_ipamaster and is_ipaserver and is_ipaserver_csreplica
+  service: name=pki-tomcatd@pki-tomcat state=started
+
+- name: STOP pki for servers that are not csreplica
+  when: (not is_ipamaster) and is_ipaserver and (not is_ipaserver_csreplica)
+  service: name=pki-tomcatd@pki-tomcat state=stopped
+
+###############
+## PKI HTTPD ##
+###############
+- name: MASTER PKI RewriteRule ^/ipa/crl/MasterCRL.bin
+  when: is_ipamaster and is_ipaserver and is_ipaserver_csreplica
+  lineinfile: >
+    state=present
+    dest=/etc/httpd/conf.d/ipa-pki-proxy.conf
+    regexp='.*RewriteRule ./ipa/crl/MasterCRL.bin.*'
+    line='# ANSIBLE MANAGED #  RewriteRule ^/ipa/crl/MasterCRL.bin https://{{ ipa_master_server }}/ca/ee/ca/getCRL?op=getCRL&crlIssuingPoint=MasterCRL [L,R=301,NC]'
+  notify:
+    restart httpd
+
+- name: SLAVE PKI RewriteRule ^/ipa/crl/MasterCRL.bin
+  when: (not is_ipamaster) and is_ipaserver and is_ipaserver_csreplica
+  lineinfile: >
+    state=present
+    dest=/etc/httpd/conf.d/ipa-pki-proxy.conf
+    regexp='.*RewriteRule ./ipa/crl/MasterCRL.bin.*'
+    line='RewriteRule ^/ipa/crl/MasterCRL.bin https://{{ ipa_master_server }}/ca/ee/ca/getCRL?op=getCRL&crlIssuingPoint=MasterCRL [L,R=301,NC]'
+  notify:
+    restart httpd
+
+####################
+## DISABLE DNSSEC ##
+####################
+- name: Disable DNSSec in /etc/named.conf
+  when: ansible_os_family == 'RedHat' and is_ipaserver
+  lineinfile: >
+    state=present
+    dest=/etc/named.conf
+    regexp='.*dnssec-validation.*'
+    line='       dnssec-validation yes;'
+  notify:
+    restart named
+
+# vim:ft=ansible:

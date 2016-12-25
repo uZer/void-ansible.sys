@@ -1,0 +1,22 @@
+# {{ ansible_managed }}
+
+{% if repo_epel %}
+## EPEL
+[epel-rhel6]
+name=epel-rhel6
+baseurl=http://{{ repo_servers[0] }}/cobbler/repo_mirror/epel-rhel6
+timeout=180
+priority=50
+gpgcheck=1
+enabled=1
+
+{% if repo_epel_testing %}
+[epel-testing-rhel6]
+name=epel-testing-rhel6
+baseurl=http://{{ repo_servers[0] }}/cobbler/repo_mirror/epel-testing-rhel6
+timeout=180
+priority=50
+gpgcheck=1
+enabled=1
+{% endif %}
+{% endif %}

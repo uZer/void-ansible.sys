@@ -1,0 +1,20 @@
+---
+- name: TIMEZONE file (ubuntu)
+  when: ansible_os_family == 'Debian'
+  copy:
+    content: "{{ timezone }}"
+    dest: "{{ timezone_file }}"
+
+- name: Set timezone config (Red Hat)
+  when: ansible_os_family == 'RedHat'
+  copy:
+    content: "ZONE=\"{{ timezone }}\""
+    dest: "{{ timezone_file }}"
+
+- name: Set link to localtime
+  file:
+    state: link
+    src: "{{ zoneinfo_dir }}/{{ timezone }}"
+    dest: "{{ localtime_file }}"
+    force: yes
+# vim:ft=ansible:

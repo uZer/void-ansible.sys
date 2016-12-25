@@ -1,0 +1,25 @@
+---
+- name: restart nfs-config
+  service: name=nfs-config state=restarted
+
+- name: restart nfs
+  service: name=nfs state=restarted
+
+- name: restart nfs-server
+  service: name=nfs-server state=restarted
+
+- name: restart nfs-secure
+  service: name=nfs-secure state=restarted
+
+- name: restart nfs-secure-server
+  service: name=nfs-secure-server state=restarted
+
+- name: restart rpcbind
+  service: name=rpcbind state=restarted
+
+- name: restart rpcsvcgssd
+  service: name=rpcsvcgssd state=restarted
+
+- name: reload exports
+  command: /usr/sbin/exportfs -ra
+

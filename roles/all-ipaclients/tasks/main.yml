@@ -1,0 +1,116 @@
+---
+- name: Configuration of variables
+  include_vars: '{{ ansible_os_family }}.yml'
+
+## UBUNTU
+#- name: UBUNTU - Install PPA for newest sssd
+#  when: ansible_distribution == 'Ubuntu' and ansible_distribution_release == 'trusty' and is_ipaclient
+#  register: newrepo
+#  template: >
+#    src=etc-apt-sources.list.d-sssd-updates-trusty.list.j2
+#    dest=/etc/apt/sources.list.d/sssd-updates-trusty.list
+
+#- name: UBUNTU - update GPG keys
+#  when: ansible_distribution == 'Ubuntu' and ansible_distribution_release == 'trusty' and is_ipaclient
+#  apt_key: url=http://{{ repo_servers[0] }}/cblr/repo_mirror/SSSD-Updates/dists/trusty/pubkey.asc state=present
+
+- name: UBUNTU - apt-get update
+  when: ansible_distribution == 'Ubuntu'
+  apt: update_cache=yes
+
+- name: UBUNTU - install freeipa packages
+  when: ansible_distribution == 'Ubuntu' and is_ipaclient
+  apt: name={{ item }} state=latest
+  with_items:
+    - sssd
+    - sssd-tools
+    - autofs
+    - freeipa-client
+    - nfs-common
+
+- stat: path=/etc/ipa/default.conf
+  register: p1
+  check_mode: no
+
+- name: LINE /etc/idmapd.conf
+  when: is_ipaclient or is_ipaserver
+  lineinfile: >
+    dest=/etc/idmapd.conf
+    regexp="^Domain.*"
+    line="Domain={{ ipa_domain }}"
+
+- name: IPA import user password for enrollment
+  when: not p1.stat.exists and is_ipaclient
+  include_vars: "vault.yml"
+
+- name: IPA Enroll (ipa-client-install)
+  when: not p1.stat.exists and is_ipaclient
+  command: "ipa-client-install --server={{ ipa_servers[0] }} --domain={{ ipa_domain }} --principal={{ ipa_ansibleuser }} --password={{ ipa_ansiblepassword }} --ssh-trust-dns --unattended --no-ntp"
+
+- stat: path=/etc/ipa/default.conf
+  register: p2
+  check_mode: no
+
+- name: IPA check if autofs configured
+  command: grep "automount:.*sss" /etc/nsswitch.conf
+  register: p3
+  check_mode: no
+  ignore_errors: True
+  changed_when: False
+
+- name: IPA check if autofs configured
+  command: grep "services.*autofs" /etc/sssd/sssd.conf
+  register: p4
+  check_mode: no
+  ignore_errors: True
+  changed_when: False
+
+  #- name: NFS enable nfsv4 with kerberos in /etc/sysconfig/nfs
+  #  when: p2.stat.exists and (is_ipaclient or is_ipaserver) and is_ipamounthome and ansible_os_family == 'RedHat'
+  #  lineinfile: >
+  #    dest="/etc/sysconfig/nfs"
+  #    regexp=".*SECURE_NFS=.*"
+  #    line='#SECURE_NFS="no"'
+  #  notify:
+  #  - restart rpcgssd
+  #  - restart rpcbind
+  #  - restart rpcidmapd
+
+- name: IPA Enroll with auto-fs
+  when: p2.stat.exists and not (p3.rc == 0 and p4.rc == 0) and is_ipamounthome and (is_ipaclient or is_ipaserver)
+  command: "ipa-client-automount --server={{ ipa_servers[0] }} --location={{ location }} -U"
+  notify:
+  - restart rpcbind
+  - restart gssd
+
+
+- name: LINE check newline in /etc/nsswitch.conf (Ubuntu 14 bug)
+  when: p2.stat.exists and is_ipamounthome and (is_ipaclient or is_ipaserver)
+  lineinfile: >
+    dest=/etc/nsswitch.conf
+    regexp="^automount:"
+    line="automount: sss files"
+  notify:
+  - restart sssd
+  - restart autofs
+  - restart sshd
+
+- name: TEMPLATE /etc/sssd/sssd.conf
+  when: p2.stat.exists and is_ipaclient and not is_ipaserver
+  template: src=etc-sssd-sssd.conf.j2 dest=/etc/sssd/sssd.conf owner=root group=root mode=600 backup=yes
+  notify:
+  - restart sssd
+  - restart autofs
+  - restart sshd
+#- name: DESTROY KERBEROS TOKEN ON LOGOUT (ZSH) except for towers
+#  template: src=etc-zsh-zlogout.j2 dest=/etc/zsh/zlogout owner=root group=root mode=644 backup=no
+#  template: src=etc-zsh-zlogout.j2 dest=/etc/zlogout owner=root group=root mode=644 backup=no
+#  when: not is_tower
+#  tags: configuration
+#
+#- name: DESTROY KERBEROS TOKEN ON LOGOUT (BASH) except for towers
+#  template: src=etc-skel-.bash_logout.j2 dest=/etc/skel/.bash_logout owner=root group=root mode=644 backup=no
+#  when: not is_tower
+#  tags: configuration
+
+# vim:ft=ansible:

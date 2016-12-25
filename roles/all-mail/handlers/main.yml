@@ -1,0 +1,11 @@
+---
+- name: restart postfix
+  service: name={{ postfix_service_name }} state=restarted
+
+- name: postmap gen
+  shell: postmap /etc/postfix/sender_canonical
+
+- name: newaliases
+  shell: newaliases
+
+#vim:ft=ansible:

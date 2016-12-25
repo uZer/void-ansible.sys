@@ -1,0 +1,45 @@
+# {{ ansible_managed }}
+
+[domain/{{ ipa_domain }}]
+cache_credentials = True
+krb5_store_password_if_offline = True
+ipa_domain = {{ ipa_domain }}
+id_provider = ipa
+auth_provider = ipa
+access_provider = ipa
+ipa_hostname = {{ ansible_fqdn }}
+chpass_provider = ipa
+{% if is_ipaserver %}
+ipa_server_mode = True
+ipa_server = {{ ansible_fqdn }}
+{% else %}
+ipa_server = {{ ipa_servers | join(', ') }}
+{% endif %}
+ldap_tls_cacert = /etc/ipa/ca.crt
+autofs_provider = ipa
+ipa_automount_location = {{ location }}
+selinux_provider=none
+
+[sssd]
+services = {{ sssd_services | join(', ') }}
+config_file_version = 2
+domains = {{ ipa_domain }}
+
+[nss]
+memcache_timeout = 600
+homedir_substring = /home
+
+[pam]
+
+[sudo]
+
+[autofs]
+# debug_level=6
+
+[ssh]
+
+[pac]
+
+[ifp]
+
+

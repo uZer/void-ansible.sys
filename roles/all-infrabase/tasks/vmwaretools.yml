@@ -1,0 +1,25 @@
+---
+#############
+## INSTALL ##
+#############
+
+- name: yum install open-vm-tools
+  yum: name=open-vm-tools state=installed
+  when: ansible_os_family == 'RedHat' and ansible_virtualization_type == "VMware"
+  tags: [ 'package' ]
+  notify:
+  - restart open-vm-tools
+
+- name: apt-get install Mediaserv basic tools
+  apt: name=open-vm-tools state=installed
+  when: ansible_os_family == 'Debian' and ansible_virtualization_type == "VMware"
+  tags: [ 'package' ]
+
+- name: SERVICE start open-vm-tools
+  when: ansible_virtualization_type == "VMware"
+  service: name={{ ovmt_service_name }} state=started enabled=yes
+  ignore_errors: True
+
+- meta: flush_handlers
+
+# vim:ft=ansible:

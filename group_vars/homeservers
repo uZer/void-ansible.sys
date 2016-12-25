@@ -1,0 +1,8 @@
+---
+is_homeserver: true
+is_ipamounthome: false
+sssd_services:
+- nss
+- sudo
+- pam
+- ssh

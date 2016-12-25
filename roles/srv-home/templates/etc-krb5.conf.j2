@@ -1,0 +1,28 @@
+# {{ ansible_managed }}
+includedir /var/lib/sss/pubconf/krb5.include.d/
+
+[libdefaults]
+  default_realm = {{ ipa_domain|upper }}
+  dns_lookup_realm = true
+  dns_lookup_kdc = true
+  rdns = false
+  ticket_lifetime = 24h
+  forwardable = yes
+  udp_preference_limit = 0
+  default_ccache_name = KEYRING:persistent:%{uid}
+  allow_weak_crypto = false
+
+[realms]
+  {{ ipa_domain|upper }} = {
+    pkinit_anchors = FILE:/etc/ipa/ca.crt
+  }
+
+[domain_realm]
+  .{{ ipa_domain }} = {{ ipa_domain|upper }}
+  {{ ipa_domain }} = {{ ipa_domain|upper }}
+
+[logging]
+     kdc = SYSLOG:INFO:DAEMON
+     admin_server = SYSLOG:INFO:DAEMON
+     default = SYSLOG:INFO:DAEMON
+

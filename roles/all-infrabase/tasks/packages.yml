@@ -1,0 +1,102 @@
+---
+
+############
+## UPDATE ##
+############
+
+- name: UBUNTU apt-get update and upgrade
+  when: ansible_distribution == 'Ubuntu'
+  apt: update_cache=yes cache_valid_time=3600 upgrade={{ upgrade_ubuntu_mode }}
+
+  # Not ready, https://github.com/ansible/ansible-modules-core/issues/4029
+  #- name: UBUNTU apt-get autoremove
+  #  when: ansible_distribution == 'Ubuntu'
+  #  apt: autoremove=yes
+  #  notify:
+  #  - update grub
+
+- meta: flush_handlers
+
+- name: YUM upgrade all
+  when: ansible_os_family == 'RedHat' and must_upgrade_yum
+  yum: name=* state=latest
+
+#############
+## INSTALL ##
+#############
+
+## ADD EPEL (AUTOMATIC MODE)
+#- name: EPEL (for Redhat/CentOS/Fedora)
+#  yum: name=epel-release state=installed
+#  when: ansible_os_family == 'RedHat'
+#  tags: [ 'package' ]
+
+- name: yum install Mediaserv basic tools
+  yum: name={{ item }} state=installed
+  when: ansible_os_family == 'RedHat'
+  tags: [ 'package' ]
+  with_items:
+    - nmap
+    - zsh
+    - tmux
+    - screen
+    - tree
+    - htop
+    - curl
+    - elinks
+    - git
+    - vim
+    - bind-utils
+    - mailx
+    - postfix
+    - ipa-client
+    - mtr
+    - tzdata
+    - mlocate
+    - zip
+    - unzip
+
+- name: apt-get install Mediaserv basic tools
+  apt: name={{ item }} state=installed
+  when: ansible_os_family == 'Debian'
+  tags: [ 'package' ]
+  with_items:
+    - nmap
+    - zsh
+    - tmux
+    - screen
+    - tree
+    - htop
+    - curl
+    - elinks
+    - git
+    - vim
+    - dnsutils
+    - mailutils
+    - postfix
+    - mtr-tiny
+    - whois
+    - update-motd
+    - update-notifier-common
+    - tzdata
+    - mlocate
+    - zip
+    - unzip
+
+############
+## REMOVE ##
+############
+#- name: yum remove puppet
+#  yum: name={{ item }} state=absent
+#  when: ansible_os_family == 'RedHat'
+#  tags: [ 'package' ]
+#  with_items:
+#    - puppet
+#
+#- name: apt-get remove puppet
+#  apt: name={{ item }} state=absent
+#  when: ansible_os_family == 'Debian'
+#  tags: [ 'package' ]
+#  with_items:
+#    - puppet
+# vim:ft=ansible:

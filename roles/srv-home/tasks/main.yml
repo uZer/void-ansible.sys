@@ -1,0 +1,102 @@
+---
+- name: Create home directory
+  when: is_homeserver
+  file: path={{ homeipa }} state=directory mode=0755
+
+- name: Symlink HOMEIPA
+  when: is_homeserver
+  file: src={{ homeipa }} dest=/homeipa state=link
+
+- name: Symlink HOMEIPA
+  when: is_homeserver and '{{ homeipa }}' != '/home'
+  file: src={{ homeipa }} dest=/home state=link
+
+- name: YUM install oddjob-mkhomedir
+  when: is_homeserver
+  yum: pkg={{ item }} state=present
+  with_items:
+    - oddjob-mkhomedir
+    - authconfig
+    - nfs-utils
+    - openldap-clients
+
+#  notify:
+#    - reload exports
+#    - restart rpcbind
+#    - restart nfs
+#    - restart nfs-server
+#    - restart nfs-secure
+#    - restart nfs-secure-server
+
+- name: TEAMPLE /etc/krb5.conf
+  when: is_homeserver
+  template: src=etc-krb5.conf.j2 dest=/etc/krb5.conf
+  notify:
+    - reload exports
+    - restart rpcbind
+    - restart nfs
+    - restart nfs-server
+    - restart nfs-secure
+    - restart nfs-secure-server
+    #    - restart rpcsvcgssd
+
+- name: TEMPLATE /etc/sysconfig/nfs
+  when: is_homeserver
+  template: src=etc-sysconfig-nfs.j2 dest=/etc/sysconfig/nfs
+  notify:
+    - restart nfs-config
+    - restart rpcbind
+    - restart nfs
+    - restart nfs-server
+    - restart nfs-secure
+    - restart nfs-secure-server
+    #- restart rpcsvcgssd
+
+- name: LINE /etc/exports
+  when: is_homeserver
+  lineinfile: >
+    dest="/etc/exports"
+    regexp="^{{ homeipa }}.*"
+    line="{{ homeipa }} *(rw,sec=krb5:krb5i:krb5p)"
+  notify:
+    - reload exports
+    - restart rpcbind
+    - restart nfs
+    - restart nfs-server
+    - restart nfs-secure
+    - restart nfs-secure-server
+    #- restart rpcsvcgssd
+
+- name: Check if authconfig did a previous run
+  command: "/bin/egrep '^session.*pam_oddjob_mkhomedir.so' /etc/pam.d/system-auth"
+  register: authconfig_run
+  changed_when: false
+  check_mode: no
+  ignore_errors: true
+
+- name: authconfig --enablemkhomedir --update
+  command: /usr/sbin/authconfig --enablemkhomedir --update
+  when: authconfig_run.rc != 0 and is_homeserver
+
+- meta: flush_handlers
+
+- name: SERVICE enable rpcbind
+  when: is_homeserver
+  service: name=rpcbind enabled=yes state=started
+
+- name: SERVICE enable nfs-server
+  when: is_homeserver
+  service: name=nfs-server enabled=yes state=started
+
+- name: TEMPLATE copy ipa.createhome.sh script
+  when: is_homeserver
+  template: src=root-ipa.createhome.sh dest=/root/ipa.createhome.sh mode=0755 owner=root
+
+- name: LINE crontab for ipa.createhome.sh
+  when: is_homeserver
+  lineinfile: >
+    dest=/etc/crontab
+    regexp=".*/root/ipa.createhome.sh.*"
+    line="*/5 *  *  *  * root /root/ipa.createhome.sh 2>&1 > /dev/null"
+
+# vim:ft=ansible:

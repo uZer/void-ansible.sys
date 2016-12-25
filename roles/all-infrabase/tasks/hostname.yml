@@ -1,0 +1,13 @@
+---
+- name: Set Hostname to correct value
+  hostname: name={{ ansible_fqdn }}
+
+- name: Set /etc/hosts to correct value
+  lineinfile: >
+    dest=/etc/hosts state=present
+    regexp="^{{ lookup('dig', ansible_fqdn) }}.+{{ ansible_fqdn }}.+{{ ansible_hostname }}"
+    line="{{ lookup('dig', ansible_fqdn) }} {{ ansible_fqdn }} {{ ansible_hostname }} {{ ansible_hostname }}.bck{% for i in host_extradomains %} {{ i }}{% endfor %}"
+    backup=yes
+
+# vim:ft=ansible:
+

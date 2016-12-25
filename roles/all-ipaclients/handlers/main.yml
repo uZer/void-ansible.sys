@@ -1,0 +1,23 @@
+---
+- name: restart sssd
+  service: name=sssd state=restarted
+
+- name: restart autofs
+  service: name=autofs state=restarted
+
+- name: restart rpcbind
+  service: name=rpcbind state=restarted
+
+- name: restart rpcidmapd
+  service: name=rpcidmapd state=restarted
+
+- name: restart rpcgssd
+  service: name=rpcgssd state=restarted
+
+- name: restart gssd
+  when: ansible_distribution == 'Ubuntu'
+  service: name=gssd state=restarted
+
+- name: restart sshd
+  service: name={{ sshd_service_name }} state=restarted
+# vim:ft=ansible:

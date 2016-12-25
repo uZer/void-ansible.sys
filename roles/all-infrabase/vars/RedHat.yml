@@ -1,0 +1,13 @@
+---
+ntp_service_name: ntpd
+ntp_config_driftfile: /var/lib/ntp/drift
+
+snmp_service_name: snmpd
+ovmt_service_name: vmtoolsd
+sshd_service_name: sshd
+
+zoneinfo_dir: /usr/share/zoneinfo
+localtime_file: /etc/localtime
+timezone_file: /etc/sysconfig/clock
+
+# vim:ft=ansible:

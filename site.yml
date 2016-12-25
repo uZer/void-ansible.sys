@@ -1,0 +1,29 @@
+---
+- name: infra basics
+  become: yes
+  hosts: all
+  roles:
+    #- all-repository
+    - all-infrabase
+    - all-ipaclients
+
+################################################################################
+
+- name: SERVERS Freeipa
+  become: yes
+  hosts: ipaservers
+  roles:
+   - srv-freeipa
+
+- name: SERVERS home
+  become: yes
+  hosts: homeservers
+  roles:
+   - srv-home
+
+- name: SERVERS towers
+  become: yes
+  hosts: towers
+  roles:
+    - srv-towers
+# vim:ft=ansible:

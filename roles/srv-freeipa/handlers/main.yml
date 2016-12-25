@@ -1,0 +1,15 @@
+---
+- name: restart httpd
+  service: name=httpd state=restarted
+
+- name: stop pki
+  service: name=pki-tomcatd@pki-tomcat state=stopped
+
+- name: start pki
+  service: name=pki-tomcatd@pki-tomcat state=started
+
+- name: restart pki
+  service: name=pki-tomcatd@pki-tomcat state=restarted
+
+- name: restart named
+  service: name=named-pkcs11 state=restarted
