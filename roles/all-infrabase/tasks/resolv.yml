@@ -2,7 +2,6 @@
 - name: Copy the resolv.conf template file
   when: is_dnsmasq_cache
   template: src=etc-resolv-dnsmasq.j2 dest=/etc/resolv.dnsmasq
-  tags: [ 'configuration', 'dns' ]
   notify:
     - restart dnsmasq
 
@@ -64,7 +63,6 @@
 
 - name: Copy the resolv.conf template file
   template: src=etc-resolv-conf.j2 dest=/etc/resolv.conf
-  tags: [ 'configuration', 'dns' ]
 
 - meta: flush_handlers
 # vim:ft=ansible:

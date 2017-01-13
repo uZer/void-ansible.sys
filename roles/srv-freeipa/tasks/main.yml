@@ -3,7 +3,7 @@
 ## INSTALL ##
 #############
 
-- name: yum install Mediaserv basic tools
+- name: yum install freeipa dependancies
   when: ansible_os_family == 'RedHat' and is_ipaserver
   yum: name={{ item }} state=installed
   tags: [ 'package' ]
@@ -47,7 +47,7 @@
     state=present
     dest=/etc/httpd/conf.d/ipa-pki-proxy.conf
     regexp='.*RewriteRule ./ipa/crl/MasterCRL.bin.*'
-    line='# ANSIBLE MANAGED #  RewriteRule ^/ipa/crl/MasterCRL.bin https://{{ ipa_master_server }}/ca/ee/ca/getCRL?op=getCRL&crlIssuingPoint=MasterCRL [L,R=301,NC]'
+    line='# ANSIBLE MANAGED #  RewriteRule ^/ipa/crl/MasterCRL.bin https://{{ ansible_fqdn }}/ca/ee/ca/getCRL?op=getCRL&crlIssuingPoint=MasterCRL [L,R=301,NC]'
   notify:
     restart httpd
 
@@ -57,7 +57,7 @@
     state=present
     dest=/etc/httpd/conf.d/ipa-pki-proxy.conf
     regexp='.*RewriteRule ./ipa/crl/MasterCRL.bin.*'
-    line='RewriteRule ^/ipa/crl/MasterCRL.bin https://{{ ipa_master_server }}/ca/ee/ca/getCRL?op=getCRL&crlIssuingPoint=MasterCRL [L,R=301,NC]'
+    line='RewriteRule ^/ipa/crl/MasterCRL.bin https://{{ ansible_fqdn }}/ca/ee/ca/getCRL?op=getCRL&crlIssuingPoint=MasterCRL [L,R=301,NC]'
   notify:
     restart httpd
 

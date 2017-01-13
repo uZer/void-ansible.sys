@@ -1,1 +1,2 @@
 *.retry
+callback_plugins/*.pyc

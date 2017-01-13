@@ -1,4 +1,13 @@
 ---
+# NEW AS OF ANSIBLE 2.2, waiting for end of preview
+#
+#- name: Set Timezone to UTC
+#  timezone:
+#    name: "{{ timezone }}"
+#  notify:
+#    - restart crond
+
+# OLD WAY
 - name: TIMEZONE file (ubuntu)
   when: ansible_os_family == 'Debian'
   copy:
@@ -17,4 +26,5 @@
     src: "{{ zoneinfo_dir }}/{{ timezone }}"
     dest: "{{ localtime_file }}"
     force: yes
+
 # vim:ft=ansible:

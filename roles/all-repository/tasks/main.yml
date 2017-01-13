@@ -55,6 +55,12 @@
 ############
 
 # Do not subscribe
+#- name: Disable Redhat suscription plugin
+#  when: (manage_repo and (not repo_register) and ansible_distribution == "RedHat" )
+#  lineinfile:
+#    dest: "/etc/yum.conf"
+#    line: "plugins=0"
+#    regexp: "^plugins="
 #- name: Disable Redhat suscription
 #  when: (manage_repo and (not repo_register) and ansible_distribution == "RedHat" )
 #  redhat_subscription: state=absent
@@ -62,8 +68,7 @@
 #- name: Disable RHN registration
 #  when: (manage_repo and (not repo_register) and ansible_distribution == "RedHat" )
 #  rhn_register: state=absent
-
-# Do not suscribe
+#
 #- name: Disable Subscription Plugin
 #  when: (manage_repo and (not repo_register) and ansible_distribution == "RedHat" )
 #  template: src='templates/etc-yum-pluginconf.d-subscription-manager.conf.j2' dest='/etc/yum/pluginconf.d/subscription-manager.conf'

@@ -1,23 +1,28 @@
 ---
 - name: Install the required packages in Redhat derivatives
-  yum: name=ntp state={{ ntp_pkg_state }}
+  yum:
+    name: ntp
+    state: "{{ ntp_pkg_state }}"
   when: ansible_os_family == 'RedHat'
-  tags: [ 'package', 'ntp' ]
 
 - name: Install the required packages in Debian derivatives
-  apt: name=ntp state={{ ntp_pkg_state }}
+  apt:
+    name: ntp
+    state: "{{ ntp_pkg_state }}"
   when: ansible_os_family == 'Debian'
-  tags: [ 'package', 'ntp' ]
 
 - name: Copy the ntp.conf template file
-  template: src=etc-ntp-conf.j2 dest=/etc/ntp.conf
+  template:
+    src: etc-ntp-conf.j2
+    dest: /etc/ntp.conf
   notify:
+  - ntpdate
   - restart ntp
-  tags: [ 'configuration', 'ntp' ]
 
 - name: Enable ntp service
-  service: name={{ ntp_service_name }} enabled={{ ntp_service_enabled }}
-  tags: [ 'service', 'ntp' ]
+  service:
+    name: "{{ ntp_service_name }}"
+    enabled: "{{ ntp_service_enabled }}"
 
 - meta: flush_handlers
 # vim:ft=ansible:

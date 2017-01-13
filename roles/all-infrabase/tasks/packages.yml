@@ -1,12 +1,18 @@
 ---
-
 ############
 ## UPDATE ##
 ############
 
 - name: UBUNTU apt-get update and upgrade
   when: ansible_distribution == 'Ubuntu'
-  apt: update_cache=yes cache_valid_time=3600 upgrade={{ upgrade_ubuntu_mode }}
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    upgrade: "{{ upgrade_ubuntu_mode }}"
+
+- name: UBUNTU apt-get autoremove
+  when: ansible_distribution == 'Ubuntu'
+  shell: "apt-get -y autoremove --purge"
 
   # Not ready, https://github.com/ansible/ansible-modules-core/issues/4029
   #- name: UBUNTU apt-get autoremove
@@ -19,7 +25,9 @@
 
 - name: YUM upgrade all
   when: ansible_os_family == 'RedHat' and must_upgrade_yum
-  yum: name=* state=latest
+  yum:
+    name: '*'
+    state: latest
 
 #############
 ## INSTALL ##
@@ -29,59 +37,22 @@
 #- name: EPEL (for Redhat/CentOS/Fedora)
 #  yum: name=epel-release state=installed
 #  when: ansible_os_family == 'RedHat'
-#  tags: [ 'package' ]
 
-- name: yum install Mediaserv basic tools
-  yum: name={{ item }} state=installed
-  when: ansible_os_family == 'RedHat'
-  tags: [ 'package' ]
-  with_items:
-    - nmap
-    - zsh
-    - tmux
-    - screen
-    - tree
-    - htop
-    - curl
-    - elinks
-    - git
-    - vim
-    - bind-utils
-    - mailx
-    - postfix
-    - ipa-client
-    - mtr
-    - tzdata
-    - mlocate
-    - zip
-    - unzip
-
-- name: apt-get install Mediaserv basic tools
-  apt: name={{ item }} state=installed
+- name: apt-get install system basic tools
   when: ansible_os_family == 'Debian'
-  tags: [ 'package' ]
+  apt:
+    name: "{{ item }}"
+    state: installed
   with_items:
-    - nmap
-    - zsh
-    - tmux
-    - screen
-    - tree
-    - htop
-    - curl
-    - elinks
-    - git
-    - vim
-    - dnsutils
-    - mailutils
-    - postfix
-    - mtr-tiny
-    - whois
-    - update-motd
-    - update-notifier-common
-    - tzdata
-    - mlocate
-    - zip
-    - unzip
+    - "{{ base_debian_packages }}"
+
+- name: yum install system basic tools
+  when: ansible_os_family == 'RedHat'
+  yum:
+    name: "{{ item }}"
+    state: installed
+  with_items:
+    - "{{ base_redhat_packages }}"
 
 ############
 ## REMOVE ##

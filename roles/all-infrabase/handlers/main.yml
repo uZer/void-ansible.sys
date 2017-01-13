@@ -14,6 +14,20 @@
 - name: restart dnsmasq
   service: name=dnsmasq state=restarted
 
+- name: stop ntp
+  service: name={{ ntp_service_name }} state=stopped
+
+- name: start ntp
+  service: name={{ ntp_service_name }} state=started
+
 - name: update grub
   shell: "update-grub"
+
+- name: update grub2
+  shell: "grub2-mkconfig -o /boot/grub2/grub.cfg"
+
+- name: ntpdate
+  shell: service {{ ntp_service_name }} stop ; ntpdate -s {{ ntp_servers[0] }}
 # vim:ft=ansible:
+
+
