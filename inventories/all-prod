@@ -1,26 +1,22 @@
 [void]
-thetower                ask_pass=true ansible_ssh_user=root
-thecastle               ask_pass=true ansible_ssh_user=root
-thevault                ask_pass=true ansible_ssh_user=root
-themine                 ask_pass=true ansible_ssh_user=root
-theweb01                ask_pass=true ansible_ssh_user=root
-thepublictoolbox        ask_pass=true ansible_ssh_user=root
+thetower
+thecastle
+thevault
+themine
+theweb01
+thepublictoolbox
 
-################################################################################
 [ipaservers]
-thecastle               ask_pass=true ansible_ssh_user=root
-################################################################################
+thecastle
 
 [towers]
-thetower                ask_pass=true ansible_ssh_user=root
+thetower
 
 [homeservers]
-thevault                ask_pass=true ansible_ssh_user=root
-
-################################################################################
+thevault
 
 [ipaclients]
-thetower                ask_pass=true ansible_ssh_user=root
-themine                 ask_pass=true ansible_ssh_user=root
-theweb01                ask_pass=true ansible_ssh_user=root
-thepublictoolbox        ask_pass=true ansible_ssh_user=root
+thetower
+themine
+theweb01
+thepublictoolbox
