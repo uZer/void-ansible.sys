@@ -1,0 +1,28 @@
+---
+language: python
+ptyhon: "2.7"
+
+before_install:
+  - "echo OK"
+
+install:
+  - "pip install ansible"
+
+env:
+  - distro: centos7
+    playbook: test.yml
+  - distro: centos6
+    playbook: test.yml
+  - distro: ubuntu1404
+    playbook: test.yml
+  - distro: ubuntu1604
+    playbook: test.yml
+
+script:
+  - >
+    ansible-playbook tests/test.yml -i tests/inventory --connection=local
+
+  # idempotency check
+  - >
+    ansible-playbook tests/test.yml -i tests/inventoml --connection=local
+    | grep -q 'changed=0.*failed=0'
