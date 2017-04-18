@@ -1,0 +1,47 @@
+---
+- name: Postfix - Fill generic map /etc/postfix/sender_canonical
+  lineinfile:
+    dest: /etc/postfix/sender_canonical
+    regexp: "^@{{ ansible_fqdn }}"
+    line: "@{{ ansible_fqdn }} {{ smtp_source }}"
+    state: present
+    create: yes
+    backup: yes
+  notify:
+    - postmap gen
+    - restart postfix
+  when: has_mail_management
+
+- name: Postfix - place email and user aliases in /etc/aliases
+  lineinfile:
+    dest: /etc/aliases
+    regexp: '^root\:'
+    line: "root: {{ root_mail }}"
+    backup: yes
+    state: present
+  notify:
+    - newaliases
+  when: has_mail_management
+
+- name: Configure postfix in /etc/postfix/main.cf
+  template:
+    src: etc-postfix-main.cf.j2
+    dest: /etc/postfix/main.cf
+    owner: root
+    group: root
+    mode: '0644'
+    backup: yes
+  notify:
+  - restart postfix
+  when: has_mail_management
+
+
+- name: Ensure postfix is enabled and started
+  service:
+    name: "{{ postfix_service_name }}"
+    enabled: yes
+    state: started
+  when: has_mail_management
+
+# vim:ft=ansible:
+

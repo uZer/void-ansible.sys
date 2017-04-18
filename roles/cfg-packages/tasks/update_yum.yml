@@ -1,0 +1,9 @@
+---
+- name: Update and upgrade all packages (yum)
+  when: ansible_os_family == 'RedHat' and must_upgrade_yum
+  yum:
+    name: '*'
+    state: latest
+
+- meta: flush_handlers
+# vim:ft=ansible:

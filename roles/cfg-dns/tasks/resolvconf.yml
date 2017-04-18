@@ -1,0 +1,40 @@
+- name: Remove DNS in network interface configuration if needed (Redhat/Centos)
+  lineinfile:
+    dest: "/etc/sysconfig/network-scripts/ifcfg-{{ item }}"
+    regexp: "^DNS[0-9]=.*"
+    state: absent
+    create: no
+  ignore_errors: yes
+  when: ansible_os_family == 'RedHat' or ansible_os_family == "CentOS"
+  with_items:
+    - eth0
+    - eth1
+
+- name: Disable NetworkManager DNS Override
+  ini_file:
+    dest: /etc/NetworkManager/NetworkManager.conf
+    section: main
+    option: dns
+    value: none
+  when: >
+    (ansible_os_family == 'RedHat' or ansible_os_family == "CentOS") and
+    ansible_distribution_version >= '7'
+
+- name: Check if resolvconf is a symlink. We don't want symlink. Bad symlink.
+  stat:
+    path: /etc/resolv.conf
+  register: sym
+
+- name: Remove symlink if needed, we want static file for /etc/resolv.conf
+  file:
+    path: /etc/resolv.conf
+    state: absent
+  when: sym.stat.islnk is defined and sym.stat.islnk
+
+- name: Copy the resolv.conf template file
+  template:
+    src: etc-resolv-conf.j2
+    dest: /etc/resolv.conf
+
+- meta: flush_handlers
+

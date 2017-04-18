@@ -1,0 +1,159 @@
+---
+# This file will replace main apt/yum repositories in all systems
+
+# UBUNTU
+# Extra apt repositories are related to applications and deployed elsewhere.
+- name: Setting Ubuntu main apt repositories
+  template:
+    src: "etc-apt-sources.list.j2"
+    dest: "/etc/apt/sources.list"
+    owner: root
+    group: root
+    mode: "0644"
+    backup: yes
+  notify:
+  - apt_update
+  when: >
+    manage_repo and
+    ansible_distribution == "Ubuntu"
+
+################################################################################
+
+# CENTOS
+- name: Get Centos 7 odd yum repos
+  register: p
+  ignore_errors: true
+  shell: "find /etc/yum.repos.d/ -type f ! -name '*.cobbler.repo' -exec mv {} /tmp \\;"
+  when: >
+    manage_repo and
+    ansible_distribution == "CentOS" and
+    ansible_distribution_major_version == "7"
+  changed_when: not p.stdout == ""
+
+- name: Installing Cobbler repositories (CentOS 7)
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dst }}"
+    owner: root
+    group: root
+    mode: "0644"
+    backup: no
+  notify:
+    - yum_clean
+    - yum_upgrade_all
+  when: >
+    manage_repo and
+    ansible_distribution == "CentOS" and
+    ansible_distribution_major_version == "7"
+  with_items:
+    - { src: 'templates/etc-yum.repos.d-centos7.cobbler.repo.j2', dst: '/etc/yum.repos.d/centos7.cobbler.repo' }
+    - { src: 'templates/etc-yum.repos.d-epel7.cobbler.repo.j2', dst: '/etc/yum.repos.d/epel7.cobbler.repo' }
+
+
+
+############
+# REDHAT 6 #
+############
+
+# Do not subscribe
+- name: Disable Redhat suscription plugin
+  lineinfile:
+    dest: "/etc/yum.conf"
+    line: "plugins=0"
+    regexp: "^plugins="
+  when: >
+    manage_repo and (not repo_register) and ansible_distribution == "RedHat"
+
+- name: Disable Redhat suscription
+  redhat_subscription:
+    state: absent
+  when: >
+    manage_repo and (not repo_register) and ansible_distribution == "RedHat"
+
+  #- name: Disable RHN registration
+  #  when: (manage_repo and (not repo_register) and ansible_distribution == "RedHat" )
+  #  rhn_register: state=absent
+
+- name: Disable Subscription Plugin
+  template:
+    src: 'templates/etc-yum-pluginconf.d-subscription-manager.conf.j2'
+    dest: '/etc/yum/pluginconf.d/subscription-manager.conf'
+  when: >
+    manage_repo and (not repo_register) and ansible_distribution == "RedHat"
+
+- name: Installing Cobbler repositories (RedHat 6)
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dst }}"
+    owner: root
+    group: root
+    mode: '0644'
+    backup: no
+  when: >
+    manage_repo and ansible_distribution == "RedHat" and
+    ansible_distribution_major_version == "6"
+  with_items:
+    - { src: 'templates/etc-yum.repos.d-redhat6.cobbler.repo.j2', dst: '/etc/yum.repos.d/redhat6.cobbler.repo' }
+    - { src: 'templates/etc-yum.repos.d-epel6.cobbler.repo.j2', dst: '/etc/yum.repos.d/epel6.cobbler.repo' }
+  register: modifiedtemplate
+  notify:
+  - yum_del
+  - yum_clean
+
+########
+# KEYS #
+########
+
+## COPY
+- name: Copy GPG keys for base and testing
+  when: (manage_repo and (ansible_distribution == "RedHat" or ansible_distribution == "CentOS"))
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dst }}"
+    owner: root
+    group: root
+    mode: '0644'
+    backup: yes
+  with_items:
+    - { src: '../resources/{{ repo_gpg_base_url }}', dst: '/etc/pki/rpm-gpg/{{ repo_gpg_base_url }}' }
+    - { src: '../resources/{{ repo_gpg_base_url_testing }}', dst: '/etc/pki/rpm-gpg/{{ repo_gpg_base_url_testing }}' }
+
+- name: Copy GPG keys for EPEL
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dst }}"
+    owner: root
+    group: root
+    mode: '0644'
+    backup: yes
+  when: ansible_distribution == "RedHat" or ansible_distribution == "CentOS"
+  with_items:
+    - { src: '../resources/{{ repo_gpg_epel_url }}', dst: '/etc/pki/rpm-gpg/{{ repo_gpg_epel_url }}' }
+
+## INSTALL
+- name: Install BASE GPG key
+  rpm_key:
+    key: "/etc/pki/rpm-gpg/{{ repo_gpg_base_url }}"
+    state: present
+  when: >
+    manage_repo and
+    (ansible_distribution == "RedHat" or ansible_distribution == "CentOS")
+
+- name: Install BASE-TESTING GPG key
+  rpm_key:
+    key: "/etc/pki/rpm-gpg/{{ repo_gpg_base_url_testing }}"
+    state: present
+  when: >
+    manage_repo and repo_testing and
+    (ansible_distribution == "RedHat" or ansible_distribution == "CentOS")
+
+- name: Install EPEL GPG key
+  rpm_key:
+    key: "/etc/pki/rpm-gpg/{{ repo_gpg_epel_url }}"
+    state: present
+  when: >
+    repo_epel and
+    (ansible_distribution == "RedHat" or ansible_distribution == "CentOS")
+
+- meta: flush_handlers
+# vim:ft=ansible:

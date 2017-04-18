@@ -1,0 +1,20 @@
+---
+## DISCLAMER (before login)
+- name: Replace /etc/issue.net (message displayed before we log in)
+  template:
+    src: etc-issue.net.j2
+    dest: /etc/issue.net
+  notify:
+    - restart sshd
+  when: is_ipaclient or is_ipaserver
+
+## AFTER LOGIN
+- name: Replace /etc/motd (message displayed after we log in)
+  template:
+    src: etc-motd.j2
+    dest: /etc/motd
+  notify:
+    - restart sshd
+
+- meta: flush_handlers
+# vim:ft=ansible:

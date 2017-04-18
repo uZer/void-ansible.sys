@@ -1,0 +1,22 @@
+---
+- name: Update and upgrade all packages (apt)
+  apt:
+    upgrade: "{{ upgrade_ubuntu_mode }}"
+  when: ansible_distribution == 'Ubuntu'
+
+####### Broken with no name given. Waiting for a patch.
+#### - name: Autoremove old kernel and useless packages. Update Grub.
+####   apt:
+####     autoremove: yes
+####   notify:
+####   - update grub
+####   when: ansible_distribution == 'Ubuntu'
+
+# FIXME: Replace with commented bloc as soon as Ansible is updated
+- name: UBUNTU apt-get autoremove
+  when: ansible_distribution == 'Ubuntu'
+  shell: "apt-get -y autoremove --purge"
+
+
+- meta: flush_handlers
+# vim:ft=ansible:

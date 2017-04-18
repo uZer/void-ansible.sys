@@ -1,0 +1,8 @@
+---
+# from galaxy.ansible.com
+- src: MichaelRigart.interfaces
+  name: ext.michaelrigart.interfaces
+  version: master
+
+# vim:ft=ansible:
+

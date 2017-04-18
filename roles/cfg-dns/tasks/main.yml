@@ -1,0 +1,6 @@
+---
+- include: dnsmasq.yml
+  when: is_dnsmasq_cache
+
+- include: resolvconf.yml
+# vim:ft=ansible:

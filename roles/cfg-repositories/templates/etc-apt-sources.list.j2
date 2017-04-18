@@ -1,0 +1,19 @@
+# {{ ansible_managed }}
+#
+# Repository: {{ repo_servers[0] }}
+{% if ansible_distribution_release == "trusty" %}
+deb [arch=amd64] http://{{ repo_servers[0] }}/cblr/repo_mirror/ubuntu-14.04.1-x86_64 trusty main universe multiverse
+deb [arch=amd64] http://{{ repo_servers[0] }}/cblr/repo_mirror/ubuntu-14.04.1-x86_64 trusty-updates main universe multiverse
+deb [arch=amd64] http://{{ repo_servers[0] }}/cblr/repo_mirror/ubuntu-14.04.1-x86_64 trusty-security main universe multiverse
+deb [arch=amd64] http://{{ repo_servers[0] }}/cblr/repo_mirror/ubuntu-14.04.1-x86_64 trusty-backports main universe multiverse
+
+{% elif ansible_distribution_release == "xenial" %}
+deb [arch=amd64] http://{{ repo_servers[0] }}/cblr/repo_mirror/ubuntu-16.04.1-server-x86_64 xenial main universe multiverse
+deb [arch=amd64] http://{{ repo_servers[0] }}/cblr/repo_mirror/ubuntu-16.04.1-server-x86_64 xenial-updates main universe multiverse
+deb [arch=amd64] http://{{ repo_servers[0] }}/cblr/repo_mirror/ubuntu-16.04.1-server-x86_64 xenial-security main universe multiverse
+{% else %}
+deb [arch=amd64] http://{{ repo_servers[0] }}/cblr/repo_mirror/ubuntu-{{ ansible_distribution_version }}-x86_64 {{ ansible_distribution_release }} main universe multiverse
+deb [arch=amd64] http://{{ repo_servers[0] }}/cblr/repo_mirror/ubuntu-{{ ansible_distribution_version }}-x86_64 {{ ansible_distribution_release }}-updates main universe multiverse
+deb [arch=amd64] http://{{ repo_servers[0] }}/cblr/repo_mirror/ubuntu-{{ ansible_distribution_version }}-x86_64 {{ ansible_distribution_release }}-security main universe multiverse
+deb [arch=amd64] http://{{ repo_servers[0] }}/cblr/repo_mirror/ubuntu-{{ ansible_distribution_version }}-x86_64 {{ ansible_distribution_release }}-backports main universe multiverse
+{% endif %}

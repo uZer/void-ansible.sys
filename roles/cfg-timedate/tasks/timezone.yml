@@ -1,0 +1,7 @@
+---
+- name: Set system Timezone to UTC. We should restart crond if changed
+  timezone:
+    name: "{{ timezone }}"
+  notify:
+    - restart crond
+# vim:ft=ansible:

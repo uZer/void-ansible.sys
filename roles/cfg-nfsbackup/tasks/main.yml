@@ -1,0 +1,13 @@
+---
+- name: Create /nfs-backup if needed
+  file:
+    path: "/nfs_backup"
+    state: directory
+
+- name: Mount backup directory in /nfs_backup
+  mount:
+    name: /nfs_backup
+    state: mounted
+    fstype: nfs
+    src: "{{ nfs_backup_server[0] }}:/data/nfs_backup/{{ ansible_hostname }}"
+

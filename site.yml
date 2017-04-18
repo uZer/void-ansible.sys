@@ -3,9 +3,26 @@
   become: yes
   hosts: all
   roles:
-    #- all-repository
-    - all-infrabase
+    - role: cfg-dns
+    - role: cfg-repositories
+      when: manage_repo
+    - role: ext.michaelrigart.interfaces
+      when: manage_network
+    - role: cfg-hostname
+      when: is_ipaclient or is_ipaserver
+    - role: cfg-packages
+    - role: cfg-timedate
+    - role: cfg-ssh
+    - role: cfg-snmpd
+    - role: cfg-grubfix
+      when: ansible_distribution == 'CentOS'
     - all-ipaclients
+    - role: cfg-postfix
+      when: has_mail_management
+    - role: cfg-nfsbackup
+      when: has_nfs_backup
+    - role: cfg-docker
+      when: has_docker and ansible_os_family == "Debian"
 
 ################################################################################
 

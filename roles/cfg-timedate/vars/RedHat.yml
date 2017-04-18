@@ -1,0 +1,9 @@
+---
+ntp_service_name: ntpd
+ntp_config_driftfile: /var/lib/ntp/drift
+zoneinfo_dir: /usr/share/zoneinfo
+localtime_file: /etc/localtime
+timezone_file: /etc/sysconfig/clock
+cron_service_name: crond
+
+# vim:ft=ansible:

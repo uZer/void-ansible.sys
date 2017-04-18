@@ -1,8 +1,12 @@
 ---
 is_homeserver: true
+
+# Don't automount home
 is_ipamounthome: false
+
+# No autofs
 sssd_services:
-- nss
-- sudo
-- pam
-- ssh
+  - nss
+  - sudo
+  - pam
+  - ssh

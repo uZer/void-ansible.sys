@@ -1,0 +1,7 @@
+---
+- name: restart snmpd
+  service:
+    name: "{{ snmp_service_name }}"
+    state: restarted
+
+# vim:ft=ansible:

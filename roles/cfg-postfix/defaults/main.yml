@@ -1,0 +1,8 @@
+---
+postfix_service_name: 'postfix'
+smtp_servers:
+  - 'smtp.explample.com'
+smtp_domain: 'example.com'
+smtp_source: "{{ ansible_hostname }}@{{ smtp_domain }}"
+root_mail: 'root@example.com'
+# vim:ft=ansible:

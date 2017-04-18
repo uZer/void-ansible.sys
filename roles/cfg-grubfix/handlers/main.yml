@@ -1,0 +1,7 @@
+---
+- name: update grub
+  shell: "update-grub"
+
+- name: update grub2
+  shell: "grub2-mkconfig -o /boot/grub2/grub.cfg"
+# vim:ft=ansible:

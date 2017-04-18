@@ -1,0 +1,47 @@
+---
+- name: Install dnsmasq resolv.conf file in /etc/resolv.dnsmasq
+  template:
+    src: etc-resolv-dnsmasq.j2
+    dest: /etc/resolv.dnsmasq
+  notify:
+    - restart dnsmasq
+
+- name: Install dnsmasq package (apt)
+  apt:
+    name: dnsmasq
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: Install dnsmasq package (yum)
+  yum:
+    name: dnsmasq
+    state: present
+  when: ansible_os_family == 'RedHat'
+
+- name: Don't use resolvconf for dnsmasq configuration
+  lineinfile:
+    dest: /etc/default/dnsmasq
+    regexp: "^IGNORE_RESOLVCONF.*"
+    line: "IGNORE_RESOLVCONF=yes"
+  notify:
+    - restart dnsmasq
+  when: ansible_os_family == 'Debian'
+
+- name: Configure /etc/dnsmasq.conf
+  template:
+    src: etc-dnsmasq.conf.j2
+    dest: /etc/dnsmasq.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - restart dnsmasq
+
+- name: Ensure dnsmasq service is stared and enabled
+  service:
+    name: dnsmasq
+    state: started
+    enabled: yes
+
+- meta: flush_handlers
+# vim:ft=ansible:

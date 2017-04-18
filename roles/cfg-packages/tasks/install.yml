@@ -1,0 +1,35 @@
+---
+- name: Install packages on system (apt)
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    name: "{{ item }}"
+    state: installed
+  when: ansible_os_family == 'Debian'
+  with_items:
+    - "{{ install_packages.Debian }}"
+
+- name: Install packages on system (yum)
+  yum:
+    name: "{{ item }}"
+    state: installed
+  when: ansible_os_family == 'RedHat'
+  with_items:
+    - "{{ install_packages.RedHat }}"
+
+- name: Remove packages on system (apt)
+  apt:
+    name: "{{ item }}"
+    state: absent
+  when: ansible_os_family == 'Debian'
+  with_items:
+    - "{{ removed_packages.Debian }}"
+
+- name: Remove packages on system (yum)
+  yum:
+    name: "{{ item }}"
+    state: absent
+  when: ansible_os_family == 'RedHat'
+  with_items:
+    - "{{ removed_packages.RedHat }}"
+# vim:ft=ansible:

@@ -1,0 +1,20 @@
+---
+ntp_pkg_state: 'installed'
+ntp_service_state: 'started'
+ntp_service_enabled: 'yes'
+ntp_servers:
+  - 'ntp.void'
+ntp_config_restrict:
+  - '-4 default kod notrap nomodify nopeer noquery'
+  - '-6 default kod notrap nomodify nopeer noquery'
+  - '127.0.0.1'
+  - '::1'
+ntp_config_filegen:
+- 'loopstats file loopstats type day enable'
+- 'peerstats file peerstats type day enable'
+- 'clockstats file clockstats type day enable'
+ntp_config_statistics: 'loopstats peerstats clockstats'
+is_ntp_server: false
+cron_service_name: crond
+timezone: Etc/UTC
+# vim:ft=ansible:

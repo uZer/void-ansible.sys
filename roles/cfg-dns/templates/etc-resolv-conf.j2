@@ -1,0 +1,25 @@
+# {{ ansible_managed }}
+{% if is_dnsmasq_cache %}
+# This servers is using dnsmasq for domain name resolution.
+# See /etc/resolv.dnsmasq for real DNS servers behind the cache.
+{% endif %}
+
+{% if dns_domain is defined %}
+domain {{ dns_domain }}
+{% endif -%}
+{% if dns_searchs is defined %}
+search {% for name in dns_searchs %}{{ name }} {% endfor %}
+{% endif %}
+
+
+{% if is_dnsmasq_cache %}
+nameserver 127.0.0.1
+{% else %}
+{% for nameserver in dns_servers %}
+nameserver {{ nameserver }}
+{% endfor %}
+
+{% for option in dns_options %}
+options {{ option }}
+{% endfor %}
+{% endif %}

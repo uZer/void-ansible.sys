@@ -1,6 +1,0 @@
-postfix_service_name: 'postfix'
-smtp_servers: [ 'smtp.void' ]
-smtp_domain: 'tesfess.es'
-smtp_source: '{{ ansible_hostname }}@{{ smtp_domain }}'
-root_mail: 'root@void'
-# vim:ft=ansible:

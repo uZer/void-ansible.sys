@@ -1,0 +1,28 @@
+---
+- name: Install ntp package (apt)
+  apt:
+    name: ntp
+    state: "{{ ntp_pkg_state }}"
+  when: ansible_os_family == 'Debian'
+
+- name: Install ntp package (yum)
+  yum:
+    name: ntp
+    state: "{{ ntp_pkg_state }}"
+  when: ansible_os_family == 'RedHat'
+
+- name: Configure /etc/ntp.conf
+  template:
+    src: "etc-ntp-conf.j2"
+    dest: "/etc/ntp.conf"
+  notify:
+  - restart ntp
+  - restart crond
+
+- name: Ensure ntp service is started and enabled
+  service:
+    name: "{{ ntp_service_name }}"
+    enabled: "{{ ntp_service_enabled }}"
+    state: started
+
+# vim:ft=ansible:

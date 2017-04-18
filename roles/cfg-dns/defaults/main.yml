@@ -1,0 +1,14 @@
+---
+# DNS
+is_dnsmasq_cache: false
+dns_domain: void
+dns_servers:
+  - 8.8.8.8
+dns_search:
+  - void
+dns_options:
+  - 'rotate'
+  - 'timeout:2'
+  - 'attempts:2'
+
+# vim:ft=ansible:

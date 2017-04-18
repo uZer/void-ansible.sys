@@ -1,0 +1,11 @@
+---
+upgrade_ubuntu_mode: 'no'
+must_upgrade_yum: false
+
+install_packages:
+  Debian: []
+  RedHat: []
+
+removed_packages:
+  Debian: []
+  RedHat: []

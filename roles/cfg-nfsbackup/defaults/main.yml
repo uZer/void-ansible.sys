@@ -1,0 +1,4 @@
+---
+nfs_backup_server:
+  - nfsserver.void
+

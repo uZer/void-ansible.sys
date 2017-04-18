@@ -1,0 +1,59 @@
+---
+- name: ensure dependencies are installed
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "apt-transport-https"
+    - "ca-certificates"
+    - "software-properties-common"
+    - "linux-image-extra-{{ ansible_kernel }}"
+  when: ansible_os_family == "Debian"
+
+- name: check status of /etc/default/ufs
+  stat:
+    path: /etc/default/ufw
+  register: docker_ufw_stat
+
+- name: ensure ufw forwarding is enabled
+  lineinfile:
+    dest: /etc/default/ufw
+    regexp: ^DEFAULT_FORWARD_POLICY=
+    line: DEFAULT_FORWARD_POLICY="ACCEPT"
+    state: present
+  when: docker_ufw_stat.stat.exists
+
+#- name: ensure cgroup swap limit is enabled in grub
+#  lineinfile:
+#    dest: /etc/default/grub
+#    regexp: ^GRUB_CMDLINE_LINUX=
+#    line: GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"
+#    state: present
+#  register: docker_grub_config
+
+#- name: update grub if necessary
+#  command: update-grub
+#  when: docker_grub_config|changed
+
+- name: ensure docker repository public key is installed
+  apt_key:
+    id: "{{ docker_apt_key }}"
+    keyserver: hkp://p80.pool.sks-keyservers.net:80
+    state: present
+  when: docker_apt_key is defined
+
+- name: ensure docker repository is enabled
+  apt_repository:
+    repo: "{{ docker_apt_repo }}"
+    update_cache: true
+    state: present
+  when: docker_apt_repo is defined
+
+- name: ensure docker packages are installed
+  package:
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ docker_packages }}"
+  when: docker_packages is defined
+
+# vim:ft=ansible:

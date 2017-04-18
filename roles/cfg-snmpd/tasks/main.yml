@@ -1,0 +1,53 @@
+---
+- include_vars: vault.yml
+
+- name: Install snmpd packages (apt)
+  apt:
+    name: snmpd
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Install snmpd packages (yum)
+  yum:
+    name: net-snmp
+    state: present
+  when: ansible_os_family == "CentOS" or ansible_os_family == "RedHat" or ansible_os_family == "Fedora"
+
+- name: Configure snmpd in /etc/snmp/snmpd.conf
+  template:
+    src: etc-snmp-snmpd-conf.j2
+    dest: /etc/snmp/snmpd.conf
+    owner: root
+    group: root
+    mode: '0644'
+    backup: yes
+  notify:
+  - restart snmpd
+
+- name: Reduce snmpd log verbosity (Redhat/Centos)
+  lineinfile:
+    dest: '/etc/sysconfig/snmpd'
+    regexp: '^OPTIONS=.*'
+    line: 'OPTIONS="-LS0-4d -Lf /dev/null -p /var/run/snmpd.pid"'
+  notify:
+  - restart snmpd
+  when: ansible_os_family == "CentOS" or ansible_os_family == "RedHat" or ansible_os_family == "Fedora"
+
+- name: Reduce snmpd log verbosity (Ubuntu)
+  lineinfile:
+    dest: '/etc/default/snmpd'
+    regexp: '^SNMPDOPTS=.*'
+    line: 'SNMPDOPTS="-LS0-4d -Lf /dev/null -u snmp -g snmp -I -smux,mteTrigger,mteTriggerConf -p /var/run/snmpd.pid"'
+  notify:
+  - restart snmpd
+  when: ansible_os_family == "Debian"
+
+- name: Ensure snmpd service is started and enabled
+  service:
+    name: "{{ snmp_service_name }}"
+    enabled: yes
+    state: started
+
+- meta: flush_handlers
+
+# vim:ft=ansible:

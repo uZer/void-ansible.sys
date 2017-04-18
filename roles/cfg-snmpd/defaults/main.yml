@@ -1,0 +1,8 @@
+---
+snmpd_communities:
+  - defaultpublic
+snmpd_location: 'defaultlocation | 00 Test Adress 00000 City'
+snmpd_syscontact: 'defaultsyscontact <default.syscontact@example.com>'
+snmp_service_name: snmpd
+
+# vim:ft=ansible:

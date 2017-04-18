@@ -1,0 +1,25 @@
+---
+- name: restart ntp
+  service:
+    name: "{{ ntp_service_name }}"
+    state: restarted
+
+- name: stop ntp
+  service:
+    name: "{{ ntp_service_name }}"
+    state: stopped
+
+- name: start ntp
+  service:
+    name: "{{ ntp_service_name }}"
+    state: started
+
+- name: restart crond
+  service:
+    name: "{{ cron_service_name }}"
+    state: restarted
+
+# FIXME: Not elegant. We stop the service but don't start it afterwards
+- name: ntpdate
+  shell: "service {{ ntp_service_name }} stop ; ntpdate -s {{ ntp_servers[0] }}"
+# vim:ft=ansible:
