@@ -25,7 +25,8 @@
       when: has_docker and ansible_os_family == "Debian"
 
 ################################################################################
-
+## LEGACY
+################################################################################
 - name: SERVERS Freeipa
   become: yes
   hosts: ipaservers

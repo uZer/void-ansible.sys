@@ -2,25 +2,16 @@
 - name: Configuration of variables
   include_vars: '{{ ansible_os_family }}.yml'
 
-## UBUNTU
-#- name: UBUNTU - Install PPA for newest sssd
-#  when: ansible_distribution == 'Ubuntu' and ansible_distribution_release == 'trusty' and is_ipaclient
-#  register: newrepo
-#  template: >
-#    src=etc-apt-sources.list.d-sssd-updates-trusty.list.j2
-#    dest=/etc/apt/sources.list.d/sssd-updates-trusty.list
-
-#- name: UBUNTU - update GPG keys
-#  when: ansible_distribution == 'Ubuntu' and ansible_distribution_release == 'trusty' and is_ipaclient
-#  apt_key: url=http://{{ repo_servers[0] }}/cblr/repo_mirror/SSSD-Updates/dists/trusty/pubkey.asc state=present
-
 - name: UBUNTU - apt-get update
+  apt:
+    update_cache: yes
   when: ansible_distribution == 'Ubuntu'
-  apt: update_cache=yes
 
 - name: UBUNTU - install freeipa packages
+  apt:
+    name: "{{ item }}"
+    state: latest
   when: ansible_distribution == 'Ubuntu' and is_ipaclient
-  apt: name={{ item }} state=latest
   with_items:
     - sssd
     - sssd-tools
@@ -33,19 +24,19 @@
   check_mode: no
 
 - name: LINE /etc/idmapd.conf
+  lineinfile:
+    dest: /etc/idmapd.conf
+    regexp: "^Domain.*"
+    line: "Domain = {{ ipa_domain }}"
   when: is_ipaclient or is_ipaserver
-  lineinfile: >
-    dest=/etc/idmapd.conf
-    regexp="^Domain.*"
-    line="Domain = {{ ipa_domain }}"
 
 - name: IPA import user password for enrollment
-  when: not p1.stat.exists and is_ipaclient
   include_vars: "vault.yml"
+  when: not p1.stat.exists and is_ipaclient
 
 - name: IPA Enroll (ipa-client-install)
-  when: not p1.stat.exists and is_ipaclient
   command: "ipa-client-install --server={{ ipa_servers[0] }} --domain={{ ipa_domain }} --principal={{ ipa_ansibleuser }} --password={{ ipa_ansiblepassword }} --ssh-trust-dns --unattended --no-ntp"
+  when: not p1.stat.exists and is_ipaclient
 
 - stat: path=/etc/ipa/default.conf
   register: p2
@@ -77,14 +68,15 @@
   #  - restart rpcidmapd
 
 - name: IPA Enroll with auto-fs
-  when: p2.stat.exists and not (p3.rc == 0 and p4.rc == 0) and is_ipamounthome and (is_ipaclient or is_ipaserver)
   command: "ipa-client-automount --server={{ ipa_servers[0] }} --location={{ location }} -U"
   notify:
   - restart rpcbind
   - restart gssd
+  when: >
+    p2.stat.exists and not (p3.rc == 0 and p4.rc == 0) and
+    is_ipamounthome and (is_ipaclient or is_ipaserver)
 
 - name: LINE check newline in /etc/nsswitch.conf (Ubuntu 14 bug)
-  when: p2.stat.exists and is_ipamounthome and (is_ipaclient or is_ipaserver)
   lineinfile: >
     dest=/etc/nsswitch.conf
     regexp="^automount:"
@@ -93,25 +85,15 @@
   - restart sssd
   - restart autofs
   - restart sshd
+  when: p2.stat.exists and is_ipamounthome and (is_ipaclient or is_ipaserver)
 
 - name: TEMPLATE /etc/sssd/sssd.conf
-  when: p2.stat.exists and is_ipaclient and not is_ipaserver
   template: src=etc-sssd-sssd.conf.j2 dest=/etc/sssd/sssd.conf owner=root group=root mode=600 backup=yes
   notify:
   - restart sssd
   - restart autofs
   - restart sshd
-
-#- name: DESTROY KERBEROS TOKEN ON LOGOUT (ZSH) except for towers
-#  template: src=etc-zsh-zlogout.j2 dest=/etc/zsh/zlogout owner=root group=root mode=644 backup=no
-#  template: src=etc-zsh-zlogout.j2 dest=/etc/zlogout owner=root group=root mode=644 backup=no
-#  when: not is_tower
-#  tags: configuration
-#
-#- name: DESTROY KERBEROS TOKEN ON LOGOUT (BASH) except for towers
-#  template: src=etc-skel-.bash_logout.j2 dest=/etc/skel/.bash_logout owner=root group=root mode=644 backup=no
-#  when: not is_tower
-#  tags: configuration
+  when: p2.stat.exists and is_ipaclient and not is_ipaserver
 
 - meta: flush_handlers
 # vim:ft=ansible:
