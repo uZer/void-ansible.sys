@@ -17,6 +17,6 @@ script:
     ansible-playbook tests/test.yml -Di tests/inventory --vault-password-file=""
 
   # Idempotency check
-  - >
-    ansible-playbook tests/test.yml -Di tests/inventory --vault-password-file=""
-    | grep -q 'changed=0.*failed=0'
+  # - >
+    # ansible-playbook tests/test.yml -Di tests/inventory --vault-password-file=""
+    # | grep -q 'changed=0.*failed=0'
