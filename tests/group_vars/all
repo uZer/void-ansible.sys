@@ -1,0 +1,134 @@
+---
+## SERVERS
+is_ipaserver: false
+is_ipamounthome: true
+is_ipaserver_csreplica: false
+is_cobblerserver: false
+is_tower: false
+is_homeserver: false
+is_dns_server: false
+is_dnsmasq_cache: false
+
+
+## STATUS
+
+is_ipaclient: false
+is_ipamaster: false
+is_cobbler_master: false
+
+## FEATURES AND ACTIONS
+
+has_docker: false
+has_dockerpy: false
+has_mail_management: true
+has_nfs_backup: false
+manage_repo: false
+manage_network: false
+
+# Redhat Registration
+repo_register: false
+
+# Upgrade Ubuntu packages (no | full).
+# Default: no, except for ipaclients/servers
+upgrade_ubuntu_mode: full
+
+# Upgrade Redhat/Centos Packages.
+# !! upgrade_yum as variable name doesn't work...
+must_upgrade_yum: true
+
+## GEOGRAPHIC
+location: rbx
+smtp_domain: 'tesfess.es'
+smtp_source: '{{ ansible_hostname }}@{{ smtp_domain }}'
+smtp_servers:
+  - "thepublictoolbox.void"
+root_mail: 'abuse@tesfess.es'
+snmpd_syscontact: 'TheVoid <abuse@tesfess.es>'
+snmpd_location: 'OVH RBX2 - Rack: 22B01 - Server ID: 205517'
+sssd_services:
+  - nss
+  - sudo
+  - pam
+  - autofs
+  - ssh
+ipa_domain: void
+ipa_ldap_domain: 'dc=void'
+
+ntp_public_servers:
+  - 'time-b.nist.gov'
+  - 'time-a.nist.gov'
+  - 'canon.inria.fr prefer'
+dns_servers:
+  - '8.8.8.8'
+dns_ipa_servers:
+  - '8.8.8.8'
+repo_servers:
+  - mirrorlist.centos.org
+ntp_servers:
+  - 'time-b.nist.gov'
+  - 'time-a.nist.gov'
+  - 'canon.inria.fr'
+ipa_servers:
+  - thecastle.void
+ipa_master_server: thecastle.void
+nfs_backup_server:
+  - thevault.void
+
+dns_domain: void
+dns_searchs:
+  - void
+dns_options:
+  - 'timeout:2'
+  - 'attempts:2'
+
+install_packages:
+  Debian:
+    - aptitude
+    - curl
+    - dnsutils
+    - elinks
+    - git
+    - htop
+    - mailutils
+    - mlocate
+    - mtr-tiny
+    - nmap
+    - open-vm-tools
+    - postfix
+    - python-apt
+    - screen
+    - tmux
+    - tree
+    - tzdata
+    - unzip
+    - update-motd
+    - update-notifier-common
+    - vim
+    - whois
+    - zip
+
+  RedHat:
+    - bind-utils
+    - curl
+    - elinks
+    - git
+    - htop
+    - ipa-client
+    - mailx
+    - mlocate
+    - mtr
+    - nmap
+    - open-vm-tools
+    - postfix
+    - screen
+    - tmux
+    - tree
+    - tzdata
+    - unzip
+    - vim
+    - zip
+    - zsh
+
+removed_packages:
+  Debian: []
+  RedHat: []

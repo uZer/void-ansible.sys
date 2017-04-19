@@ -19,10 +19,13 @@ env:
     playbook: test.yml
 
 script:
+  # Deploy
   - >
-    ansible-playbook tests/test.yml -i tests/inventory --connection=local
+    ansible-playbook -D tests/test.yml -i tests/inventory --connection=local
+    --vault-password-file=""
 
-  # idempotency check
+
+  # Idempotency check
   - >
     ansible-playbook tests/test.yml -i tests/inventoml --connection=local
-    | grep -q 'changed=0.*failed=0'
+    --vault-password-file="" | grep -q 'changed=0.*failed=0'

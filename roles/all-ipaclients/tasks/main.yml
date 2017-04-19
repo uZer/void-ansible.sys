@@ -30,9 +30,6 @@
     line: "Domain = {{ ipa_domain }}"
   when: is_ipaclient or is_ipaserver
 
-- name: IPA import user password for enrollment
-  when: not p1.stat.exists and is_ipaclient
-
 - name: IPA Enroll (ipa-client-install)
   command: "ipa-client-install --server={{ ipa_servers[0] }} --domain={{ ipa_domain }} --principal={{ ipa_ansibleuser }} --password={{ ipa_ansiblepassword }} --ssh-trust-dns --unattended --no-ntp"
   when: not p1.stat.exists and is_ipaclient
