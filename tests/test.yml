@@ -1,6 +1,8 @@
 ---
 - name: infra basics
   hosts: localhost
+  connection: local
+  become: true
   roles:
     - role: cfg-dns
     - role: cfg-repositories
