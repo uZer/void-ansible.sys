@@ -30,11 +30,11 @@ repo_register: false
 
 # Upgrade Ubuntu packages (no | full).
 # Default: no, except for ipaclients/servers
-upgrade_ubuntu_mode: full
+upgrade_ubuntu_mode: no
 
 # Upgrade Redhat/Centos Packages.
 # !! upgrade_yum as variable name doesn't work...
-must_upgrade_yum: true
+must_upgrade_yum: false
 
 ## GEOGRAPHIC
 location: rbx

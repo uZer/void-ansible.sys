@@ -2,6 +2,7 @@
 language: python
 python: "2.7"
 sudo: required
+dist: trusty
 
 before_install:
   - "echo OK"
@@ -10,21 +11,10 @@ install:
   - "pip install ansible"
   - "ansible-galaxy install -r requirements.yml"
 
-env:
-  - distro: centos7
-    playbook: test.yml
-  - distro: centos6
-    playbook: test.yml
-  - distro: ubuntu1404
-    playbook: test.yml
-  - distro: ubuntu1604
-    playbook: test.yml
-
 script:
   # Deploy
   - >
     ansible-playbook tests/test.yml -Di tests/inventory --vault-password-file=""
-
 
   # Idempotency check
   - >
