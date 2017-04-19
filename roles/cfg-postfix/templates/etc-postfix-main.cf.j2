@@ -22,12 +22,12 @@ debugger_command =
 debug_peer_level = 2
 
 ## VARIABLES
-myorigin = {{ ansible_fqdn|defaults('host.example.com') }}
-myhostname = {{ ansible_hostname|defaults('host') }}
+myorigin = {{ ansible_fqdn | default('host.example.com') }}
+myhostname = {{ ansible_hostname | default('host') }}
 {% if ansible_domain == "" %}
 mydomain = {{ dns_domain }}
 {% else %}
-mydomain = {{ ansible_domain|defaults('example.com') }}
+mydomain = {{ ansible_domain | default('example.com') }}
 {% endif %}
 relayhost = {{ smtp_servers[0] }}
 
