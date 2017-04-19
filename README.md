@@ -1,5 +1,7 @@
 # VOID-ANSIBLE: system layer
 
+[![Build Status](https://travis-ci.org/uZer/void-ansible.sys.svg?branch=master)](https://travis-ci.org/uZer/void-ansible.sys)
+
 Installation and configuration of virtual machine's system layer with Ansible.
 
 #### Main features:
