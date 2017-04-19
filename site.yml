@@ -2,6 +2,8 @@
 - name: infra basics
   become: yes
   hosts: all
+  vars_files:
+    - vault.yml
   roles:
     - role: cfg-dns
     - role: cfg-repositories

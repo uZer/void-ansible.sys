@@ -31,7 +31,6 @@
   when: is_ipaclient or is_ipaserver
 
 - name: IPA import user password for enrollment
-  include_vars: "vault.yml"
   when: not p1.stat.exists and is_ipaclient
 
 - name: IPA Enroll (ipa-client-install)
