@@ -22,9 +22,13 @@ debugger_command =
 debug_peer_level = 2
 
 ## VARIABLES
-myorigin = {{ ansible_fqdn }}
-myhostname = {{ ansible_hostname }}
-mydomain = {{ ansible_domain }}
+myorigin = {{ ansible_fqdn|defaults('host.example.com') }}
+myhostname = {{ ansible_hostname|defaults('host') }}
+{% if ansible_domain == "" %}
+mydomain = {{ dns_domain }}
+{% else %}
+mydomain = {{ ansible_domain|defaults('example.com') }}
+{% endif %}
 relayhost = {{ smtp_servers[0] }}
 
 ## CONFIG
@@ -51,4 +55,3 @@ inet_protocols = all
 #smtpd_use_tls=yes
 #smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
 #smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
-
