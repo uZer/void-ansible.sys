@@ -1,5 +1,5 @@
 # {{ ansible_managed  }}
-agentAddress            udp:{{ lookup('dig', ansible_fqdn) }}:161
+agentAddress            udp:{{ ansible_default_ipv4.address }}:161
 view                    systemonly      included   .1.3.6.1.2.1.1
 view                    systemonly      included   .1.3.6.1.2.1.25.1
 {% for community in snmpd_communities %}
