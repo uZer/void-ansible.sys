@@ -7,6 +7,7 @@ before_install:
 
 install:
   - "pip install ansible"
+  - "ansible-galaxy install -r requirements.yml"
 
 env:
   - distro: centos7
